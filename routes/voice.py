@@ -14,4 +14,4 @@ async def assistant(payload: AssistantRequest):
     body = payload.dict()
     resp = await handleVoiceRequest(body)
 
-    return {"message": "Success"}
+    return {"message": resp}
