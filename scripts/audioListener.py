@@ -5,6 +5,9 @@ import numpy as np
 import time
 from scipy.io.wavfile import write
 import os
+import subprocess
+import wave
+from piper import PiperVoice
 
 WHISPER_SIZE = "base"
 CHUNK = 1280 # 80ms @ 16kHz
@@ -46,8 +49,12 @@ def record_until_silence(stream) -> np.ndarray:
 
 
 def main():
+    # TTS
     wake = Model()
     stt = WhisperModel(WHISPER_SIZE, device="cpu", compute_type="int8")
+
+    # STT
+    voice = PiperVoice.load("./en_US-lessac-medium.onnx", config_path="./en_US-lessac-medium.onnx.json")
 
     print("Listening for wake word...")
     with sd.InputStream(samplerate=FS, channels=1, dtype="int16", blocksize=CHUNK) as stream:
@@ -78,6 +85,13 @@ def main():
 
                     if text:
                         print("You said:", text)
+
+                        with wave.open(WAV_PATH, "wb") as wav_file:
+                            print(wav_file)
+
+                            voice.synthesize_wav(text, wav_file)
+
+                        subprocess.run(["aplay", WAV_PATH], check=False)
                     else:
                         print("Heard nothing useful.")
                 finally:
