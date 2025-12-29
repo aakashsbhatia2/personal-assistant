@@ -8,7 +8,7 @@ router = APIRouter()
 class AssistantRequest(BaseModel):
     text: str
 
-@router.post("/assistant")
+@router.post("/assistant/lights")
 async def assistant(payload: AssistantRequest):
     
     body = payload.dict()
