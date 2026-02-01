@@ -9,6 +9,7 @@ Scripts:
 - Create List in HA
 - Add item to list
 - Remove item in list
+- Get All Lists
 
 To Do:
 - Delete list

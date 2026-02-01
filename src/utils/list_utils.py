@@ -71,8 +71,6 @@ def add_item_to_list(list_name, item):
         "item": item.strip()
     }
 
-    print(payload)
-
     try:
         res = requests.post(service_url, headers=headers, json=payload, timeout=10)
     except requests.RequestException as e:
@@ -124,3 +122,26 @@ def remove_item_from_list(list_name, item):
         print("Reason:", res.reason)
         print("Headers:", dict(res.headers))
         print("Body:", res.text)
+
+def list_all_lists():
+    """Fetch all to-do lists from Home Assistant and return as ToDoList objects."""
+    headers = getHeaders()
+    
+    # Query all states with entity_id starting with "todo."
+    states_url = f"{HA_URL}/api/states"
+    
+    try:
+        res = requests.get(states_url, headers=headers, timeout=10)
+        res.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Failed to fetch lists: {e}")
+        return []
+    
+    states = res.json()
+    todo_states = [s for s in states if s.get("entity_id", "").startswith("todo.")]
+    
+    if not todo_states:
+        print("No to-do lists found.")
+        return []
+
+    return todo_states
