@@ -7,10 +7,10 @@ My personal assistant
 
 Scripts:
 - Create List in HA
-
-To Do:
 - Add item to list
 - Remove item in list
+
+To Do:
 - Delete list
 - Add STT and TTS ability
 - Integrate LLM for the brains (Gotta AI amirite?)

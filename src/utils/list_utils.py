@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+import re
 from dotenv import load_dotenv
 
 # Load variables from .env
@@ -49,3 +50,77 @@ def create_todo_list(list_name):
             print(f"Response: {json.dumps(result_data, indent=2)}")
     else:
         print(f"Configuration failed ({conf_res.status_code}): {conf_res.text}")
+
+def add_item_to_list(list_name, item):
+    if not list_name or not list_name.strip():
+        print("Error: list_name cannot be empty.")
+        return
+
+    if not item or not item.strip():
+        print("Error: item cannot be empty.")
+        return
+
+    slug = re.sub(r"[^a-z0-9_]", "_", list_name.strip().lower())
+    entity_id = f"todo.{slug}"
+
+    headers = getHeaders()
+    service_url = f"{HA_URL}/api/services/todo/add_item"
+
+    payload = {
+        "entity_id": entity_id,
+        "item": item.strip()
+    }
+
+    print(payload)
+
+    try:
+        res = requests.post(service_url, headers=headers, json=payload, timeout=10)
+    except requests.RequestException as e:
+        print("Request failed:", e)
+        return
+
+    if res.ok:
+        print(f"Added '{item}' to {entity_id}")
+    else:
+        # This is ALL the data HA provides
+        print("Failed to add item")
+        print("Status:", res.status_code)
+        print("Reason:", res.reason)
+        print("Headers:", dict(res.headers))
+        print("Body:", res.text)
+
+def remove_item_from_list(list_name, item):
+    if not list_name or not list_name.strip():
+        print("Error: list_name cannot be empty.")
+        return
+
+    if not item or not item.strip():
+        print("Error: item cannot be empty.")
+        return
+
+    # Normalize list name → entity_id
+    slug = re.sub(r"[^a-z0-9_]", "_", list_name.strip().lower())
+    entity_id = f"todo.{slug}"
+
+    headers = getHeaders()
+    service_url = f"{HA_URL}/api/services/todo/remove_item"
+
+    payload = {
+        "entity_id": entity_id,
+        "item": item.strip()
+    }
+
+    try:
+        res = requests.post(service_url, headers=headers, json=payload, timeout=10)
+    except   requests.RequestException as e:
+        print("Request failed:", e)
+        return
+
+    if res.ok:
+        print(f"Removed '{item}' from {entity_id}")
+    else:
+        print("Failed to remove item")
+        print("Status:", res.status_code)
+        print("Reason:", res.reason)
+        print("Headers:", dict(res.headers))
+        print("Body:", res.text)
